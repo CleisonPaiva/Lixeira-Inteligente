@@ -11,3 +11,7 @@ Lixeira inteligente que funciona via bluetooth com app desenvolvido no APP INVEN
 
 ![Screenshot](celular.png)
 
+# Esquemas de Blocos:
+
+![Screenshot](blocos.png)
+
