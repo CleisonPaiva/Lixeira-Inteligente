@@ -1,105 +1,121 @@
+/*Projeto desenvolvido pelo aluno Cleison Mendes Paiva
+  Disciplina de Projeto Interdisciplinar 2 do 
+  curso de Sistemas de Informação lecionado na faculdade UCL*/
+
+
+
+/*------- BIBLIOTECAS ------*/
 #include<SoftwareSerial.h>
 #include <Servo.h>
 #include <HCSR04.h>
-Servo myservo;
 #include<SoftwareSerial.h>
 #include <Servo.h>
-//#include <NewPing.h>//DISTANCIA
-//#define TRIGGER_PIN 12 //DISTANCIA
-//#define ECHO_PIN 13 //DISTANCIA
-//#define MAX_DISTANCE 200 //DISTANCIA MAXIMA
-//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); //DISTANCIA
+
+Servo myservo;
+
+//Pinos do modulo bluetooth HC05
 int bluetoothTx = 10;
 int bluetoothRx = 11;
-
 SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
+
+
+//Pinos do modulos ultrasonicos
 UltraSonicDistanceSensor distancia (12,13);
 UltraSonicDistanceSensor distancia2 (5,6);
 
-int servoPin = 9;
-int led = 10;
-long duration, dist, average;
-long aver[3];
-long tempo;
+int servoPin = 9;//Porta de ligação do servo
+
 void setup() {
  
-  // put your setup code here, to run once:
+  
   myservo.attach(servoPin);
   Serial.begin(9600);
   bluetooth.begin(9600);
 
-
-  myservo.write(18);         //Inicia com a tampa fechada
+  //Inicia com a tampa fechada
+  myservo.write(18);         
   delay(100);
-  //myservo.detach();
+ 
 }
 
 
 
 void loop() {
-  int distance2=distancia2.measureDistanceCm();
-  Serial.println("dis2");
-     Serial.println(distance2);
-int a=myservo.read();
-Serial.println("aaaa");
-Serial.println(a);
-if(distance2 <10 && a==18){
-   myservo.write(110);
-   delay(3000);
+	//Obtem a distancia entre o sensor e o objeto(mão)para abrir a tampa
+	int distance2=distancia2.measureDistanceCm();
+	Serial.println("2 Distancia");
+	Serial.println(distance2);
+
+	//Escreve na serial a posição do servo motor
+	int posicao_servo=myservo.read();
+	Serial.println("Posicao do Servo:");
+	Serial.println(posicao_servo);
+
+	/*Verifica se a distancia entre o sensor e o objeto e menor que 10cm ,e se o sensor esta parado na posição 18(tampa fechada),
+	se atender a condição a tampa abre ,e se estiver aberto ela se fecha indo para a posição110(tampa fechada) */
+	if(distance2 <10 && posicao_servo==18){
+		myservo.write(110);
+		delay(3000);
    
-   }else{
+	}else{
   
-//   if(a==110){
-  myservo.write(18);
-  }
-     
-  int distance=distancia.measureDistanceCm();
-  if(distance <0){
-    distance=0;
+		myservo.write(18);
+	}
+  
+  
+	//Obtem a distancia do sensor para caclular o volume dentro da lixeira
+	int distance_vol=distancia.measureDistanceCm();
+	if(distance_vol <0){
+		distance=0;
     }
-     Serial.println(distance);
-     bluetooth.println(distance);
-      delay(2400);//LE O VOLUME DEPOIS DE 3 SEGUNDOS
-
-
     
- 
+	//Escreve na serial o volume encontrado e envia o valor via bluetooth
+    Serial.println(distance_vol);
+    bluetooth.println(distance_vol);
+    delay(2400);//Repete a leitura de volume apos 2,4 SEGUNDOS
 
-  dist = (aver[0] + aver[1] + aver[2]) / 3;
-  if (bluetooth.available()) {
-    myservo.attach(servoPin);
-     Serial.println("POSIC");
+
+	/*bluetooth.available()= Esta função retorna o número de bytes disponíveis na porta serial. Assim, sempre que o Arduino receber algum dado na porta serial 
+	enviado pelo módulo HC05 (que por sua vez receberá os dados via bluetooth do celular), esta função irá nos dizer o número de bytes recebidos*/
+	if (bluetooth.available()) {
+		
+		//Escreve na serial a posição do servo motor
+		myservo.attach(servoPin);
+		Serial.println("Posição:");
     
-    delay(1);
-    int servopos = bluetooth.read();
-     Serial.println(servopos);
-     //RECEBE SINAL 110 MANDA O MOTOR PARA POSICAO 110
-    if (servopos == 110) {
-     Serial.println(servopos);
-      // myservo.write(servopos);
-      myservo.write(110);
-      delay(30);
-      myservo.detach();
+    
+		//Le na serial a posição do servo motor
+		int servopos = bluetooth.read();
+		Serial.println(servopos);
+    
+		//Recebe a posição e manda o motor para a posição 110
+		if (servopos == 110) {
+			
+			//Escreve na serial a posição do servo motor
+			Serial.println("Posição110:");
+			Serial.println(servopos);
+    
+			myservo.write(110);
+			delay(30);
+			myservo.detach();
       
-     // delay(30);
-      //myservo.write(18);
-      //myservo.write(18);
     
 
-    }
-    //RECEBE SINAL 18 MANDA O MOTOR PARA POSICAO 18
-    if (servopos == 18){
-  
+		}
+		//Recebe a posição e manda o motor para a posição 18
+		if (servopos == 18){
+			
+			//Escreve na serial a posição do servo motor
+			Serial.println("Posição18:");
+			Serial.println(servopos);
      
-     myservo.write(18);
+			myservo.write(18);
 
-     //delay(30);
-    //  myservo.detach();
+
+		}
+     Serial.println("Posição:");
+	 Serial.println(servopos);
 
     }
-     Serial.println("POSICAO");
-    Serial.println(servopos);
-
-  }
  
 }
