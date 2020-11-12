@@ -15,3 +15,5 @@ Lixeira inteligente que funciona via bluetooth com app desenvolvido no APP INVEN
 
 ![Screenshot](blocos.png)
 
+No arquivo  CestinoApp(1).aia esta todo App
+
