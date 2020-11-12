@@ -1,0 +1,105 @@
+#include<SoftwareSerial.h>
+#include <Servo.h>
+#include <HCSR04.h>
+Servo myservo;
+#include<SoftwareSerial.h>
+#include <Servo.h>
+//#include <NewPing.h>//DISTANCIA
+//#define TRIGGER_PIN 12 //DISTANCIA
+//#define ECHO_PIN 13 //DISTANCIA
+//#define MAX_DISTANCE 200 //DISTANCIA MAXIMA
+//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); //DISTANCIA
+int bluetoothTx = 10;
+int bluetoothRx = 11;
+
+SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
+UltraSonicDistanceSensor distancia (12,13);
+UltraSonicDistanceSensor distancia2 (5,6);
+
+int servoPin = 9;
+int led = 10;
+long duration, dist, average;
+long aver[3];
+long tempo;
+void setup() {
+ 
+  // put your setup code here, to run once:
+  myservo.attach(servoPin);
+  Serial.begin(9600);
+  bluetooth.begin(9600);
+
+
+  myservo.write(18);         //Inicia com a tampa fechada
+  delay(100);
+  //myservo.detach();
+}
+
+
+
+void loop() {
+  int distance2=distancia2.measureDistanceCm();
+  Serial.println("dis2");
+     Serial.println(distance2);
+int a=myservo.read();
+Serial.println("aaaa");
+Serial.println(a);
+if(distance2 <10 && a==18){
+   myservo.write(110);
+   delay(3000);
+   
+   }else{
+  
+//   if(a==110){
+  myservo.write(18);
+  }
+     
+  int distance=distancia.measureDistanceCm();
+  if(distance <0){
+    distance=0;
+    }
+     Serial.println(distance);
+     bluetooth.println(distance);
+      delay(2400);//LE O VOLUME DEPOIS DE 3 SEGUNDOS
+
+
+    
+ 
+
+  dist = (aver[0] + aver[1] + aver[2]) / 3;
+  if (bluetooth.available()) {
+    myservo.attach(servoPin);
+     Serial.println("POSIC");
+    
+    delay(1);
+    int servopos = bluetooth.read();
+     Serial.println(servopos);
+     //RECEBE SINAL 110 MANDA O MOTOR PARA POSICAO 110
+    if (servopos == 110) {
+     Serial.println(servopos);
+      // myservo.write(servopos);
+      myservo.write(110);
+      delay(30);
+      myservo.detach();
+      
+     // delay(30);
+      //myservo.write(18);
+      //myservo.write(18);
+    
+
+    }
+    //RECEBE SINAL 18 MANDA O MOTOR PARA POSICAO 18
+    if (servopos == 18){
+  
+     
+     myservo.write(18);
+
+     //delay(30);
+    //  myservo.detach();
+
+    }
+     Serial.println("POSICAO");
+    Serial.println(servopos);
+
+  }
+ 
+}
